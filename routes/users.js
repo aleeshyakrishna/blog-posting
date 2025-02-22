@@ -1,9 +1,13 @@
 import express from 'express';
-var router = express.Router();
+const router = express.Router();
+import userController from "../controllers/userController.js";
+import auth from '../middlewares/auth.js';
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+// import auth from '../middleware/auth';
+
+router.post('/register', userController.register);
+router.post('/login', userController.login);
+router.post('/logout', auth, userController.logout);
+// router.post('/refresh-token', refreshAccessToken);
 
 export default router;

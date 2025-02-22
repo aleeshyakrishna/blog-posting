@@ -6,12 +6,13 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import { fileURLToPath } from 'url'; 
 import mongoDBConnect from './config/dbConnection.js';
+import { EventEmitter } from 'events';
 
 const __filename = fileURLToPath(import.meta.url);  // Get current file URL and convert it to file path
 const __dirname = path.dirname(__filename);  // Get directory name from the file path
+EventEmitter.defaultMaxListeners = 15;
 
 
-import indexRouter from './routes/index.js'; // Ensure you use the correct file extension
 import usersRouter from './routes/users.js';
 
 var app = express();
@@ -26,8 +27,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', usersRouter);
+// app.use('/users', usersRouter);
 
 mongoDBConnect();
 // catch 404 and forward to error handler
