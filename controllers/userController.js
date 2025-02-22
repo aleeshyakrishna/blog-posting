@@ -1,16 +1,3 @@
-// // controllers/userController.js
-// export const userControllers = {
-//   userSignup: async (req, res) => {
-//     try {
-
-//       console.log("User signup logic goes here...");
-      
-//       res.status(200).json({ message: "User signed up successfully" });
-//     } catch (error) {
-//       res.status(500).json({ message: "Error during signup" });
-//     }
-//   },
-// };
 
 import User from '../model/userSchema.js';
 import jwt from 'jsonwebtoken';
@@ -62,7 +49,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials, please try again' });
