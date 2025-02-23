@@ -2,6 +2,7 @@
 import User from '../model/userSchema.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import AppError from "../utils/AppError.js";
 
 const generateTokens = (userId) => {
   const accessToken = jwt.sign(
@@ -26,7 +27,9 @@ const register = async (req, res) => {
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      
+      return next(new AppError("User already exists", 400));
+
     }
 
     const user = new User({ username, email, password });
@@ -40,19 +43,19 @@ const register = async (req, res) => {
 
     res.status(201).json({ message:"user registered successfully ✅ ",accessToken, refreshToken });
   } catch (error) {
-    res.status(500).json({ error });
     console.log(error);
+    return next(new AppError("something went wrong", 404));
     
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res,next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials, please try again' });
+        return next(new AppError("Invalid credentials, please try again", 400));
     }
     console.log(user,"000000000");
     
@@ -60,7 +63,7 @@ const login = async (req, res) => {
     console.log(isMatch,"---->>>>");
     
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials, please try again' });
+        return next(new AppError("Invalid credentials, please try again", 400));
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -71,33 +74,18 @@ const login = async (req, res) => {
 
     res.json({ accessToken, refreshToken });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    next(error)
   }
 };
 
-// const logout = async (req, res) => {
-//   try {
-//     const refreshToken = req.header('Refresh-Token');
-    
-//     // Find user and remove refresh token
-//     await User.findOneAndUpdate(
-//       { refreshToken },
-//       { $set: { refreshToken: null } }
-//     );
-//     console.log("logged out successfully");
-    
-//     res.json({ message: 'Logged out successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Server error' });
-//   }
 
-// };
 const logout = async (req, res) => {
   try {
     const refreshToken = req.header('Refresh-Token');
 
     if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token required' });
+      return next(new AppError("Refresh token required", 400));
+
     }
 
     // Verify the refresh token before using it
@@ -105,7 +93,8 @@ const logout = async (req, res) => {
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     } catch (error) {
-      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+      return next(new AppError("Invalid or expired refresh token", 401));
+
     }
 
     // Find user and remove refresh token
@@ -116,51 +105,18 @@ const logout = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(400).json({ error: 'Invalid refresh token' });
+      return next(new AppError("Invalid refresh token", 400));
+
     }
 
     console.log("Logged out successfully");
     res.json({ message: 'Logged out successfully' });
 
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    return next(new AppError("something went wrong", 404));
   }
 };
 
-const refreshAccessToken = async (req, res) => {
-  try {
-    console.log("jjjjjjjjjjj");
-    
-    const refreshToken = req.header('Refresh-Token');
-    if (!refreshToken) {
-      return res.status(401).json({ error: 'Refresh token required' });
-    }
 
-    const user = await User.findOne({ refreshToken });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid refresh token' });
-    }
-
-    try {
-      jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      
-      // Generate new access token
-      const newAccessToken = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_ACCESS_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      res.json({ accessToken: newAccessToken });
-    } catch (error) {
-      // If refresh token is expired, remove it and require re-login
-      user.refreshToken = null;
-      await user.save();
-      return res.status(401).json({ error: 'Refresh token expired' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-};
 
 export default { register, login, logout };

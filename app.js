@@ -37,16 +37,27 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// Ensure errors are returned as JSON
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Internal Server Error";
+
+  res.status(statusCode).json({
+    success: false,
+    error: message,
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
 });
 
-app.use(errorHandler)
+
+// Handle Undefined Routes (404)
+app.all("*", (req, res, next) => {
+  next(new AppError(`Route ${req.originalUrl} not found`, 404));
+});
+
+// Global Error Handler (Must Be Last Middleware)
+app.use(errorHandler);
 
 export default app;

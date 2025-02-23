@@ -13,7 +13,8 @@ const auth = async (req, res, next) => {
       req.user = decoded;
       next();
     } catch (error) {
-      // If access token is expired, try to use refresh token
+
+      //Refresh-token checking 
       const refreshToken = req.header('Refresh-Token');
       if (!refreshToken) {
         throw new Error('Refresh token required');
@@ -42,7 +43,7 @@ const auth = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    next(error)
   }
 };
 

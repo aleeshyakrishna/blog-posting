@@ -13,9 +13,10 @@ cloudinary.config({
 
 // Create new blog
 
-export const createBlog = async (req, res) => {
+export const createBlog = async (req, res,next) => {
   try {
-        const errors = validationResult(req);
+
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return next(new AppError(errors.array().map(e => e.msg).join(", "), 400));
     }
@@ -64,7 +65,7 @@ export const createBlog = async (req, res) => {
 
   } catch (error) {
     console.error("Error creating blog:", error);
-    res.status(400).json({ error: error.message });
+    next(error)
   }
 };
 
@@ -94,13 +95,14 @@ export const getBlogs = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error)
   }
 };
 
 // Get blog by ID
-export const getBlogById = async (req, res) => {
+export const getBlogById = async (req, res, next) => {
   try {
+
     const blog = await Blog.findById(req.params.id)
       .populate('author',  'username email')
 
@@ -108,18 +110,16 @@ export const getBlogById = async (req, res) => {
      
     if (!blog) return next(new AppError("Blog not found", 404));
 
-    
-    await blog.save();
+    res.json({message:"blog fetched successfully",blog});
 
-    res.json(blog);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error)
   }
 };
 
 // Update blog
 
-export const updateBlog = async (req, res) => {
+export const updateBlog = async (req, res,next) => {
   try {
     const { id } = req.params;
     const newData = req.body;
@@ -130,7 +130,6 @@ export const updateBlog = async (req, res) => {
       { $set: newData }, 
       { new: true } 
     );
-    console.log(blog,"here im");
     
     if (!blog) return next(new AppError("Blog not found or unauthorized", 404));
 
@@ -139,12 +138,12 @@ export const updateBlog = async (req, res) => {
     res.status(200).json({ message: "Blog updated successfully", blog });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error)
   }
 };
 
 // Delete blog
-export const deleteBlog = async (req, res) => {
+export const deleteBlog = async (req, res,next) => {
   try {
     const blog = await Blog.findOneAndDelete({
       _id: req.params.id,
@@ -152,12 +151,13 @@ export const deleteBlog = async (req, res) => {
     });
 
     if (!blog) {
-      return res.status(404).json({ error: 'Blog not found or unauthorized' });
+        return next(new AppError("Blog not found or unauthorized", 404));
+
     }
 
     res.json({ message: 'Blog deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error)
   }
 };
 export default { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog };
