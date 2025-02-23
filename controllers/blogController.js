@@ -83,7 +83,7 @@ export const getBlogs = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       currentPage: page
     });
-    
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -94,14 +94,11 @@ export const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
       .populate('author', 'username email')
-      .populate('comments.user', 'username');
-
+     
     if (!blog) {
       return res.status(404).json({ error: 'Blog not found' });
     }
-
-    // Increment views
-    blog.views += 1;
+    
     await blog.save();
 
     res.json(blog);
@@ -111,23 +108,28 @@ export const getBlogById = async (req, res) => {
 };
 
 // Update blog
+
 export const updateBlog = async (req, res) => {
   try {
-    const blog = await Blog.findOne({
-      _id: req.params.id,
-      author: req.user.userId
-    });
+    const { id } = req.params;
+    const newData = req.body;
+    const userId = req.user.userId;
+
+    const blog = await Blog.findOneAndUpdate(
+      { _id: id, author: userId }, 
+      { $set: newData }, 
+      { new: true } 
+    );
 
     if (!blog) {
-      return res.status(404).json({ error: 'Blog not found or unauthorized' });
+      return res.status(404).json({ error: "Blog not found or unauthorized" });
     }
 
-    Object.assign(blog, req.body);
-    await blog.save();
-
-    res.json(blog);
+    console.log("blog updated successfully!!");
+    res.status(200).json({ message: "Blog updated successfully", blog });
+    
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -148,4 +150,4 @@ export const deleteBlog = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-export default { createBlog };
+export default { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog };
