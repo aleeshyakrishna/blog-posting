@@ -51,43 +51,53 @@ cloudinary.config({
 // };
 export const createBlog = async (req, res) => {
   try {
-    console.log(req.body, req.files, req.user.userId, "datas......>>>>");
+    // console.log(req.body, req.files, req.user.userId, "datas......>>>>");
+    const{title,content,category} = req.body;
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "At least one image is required" });
+    }
 
     const uploadedFiles = [];
 
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const imageBuffer = file.buffer;
+    for (const file of req.files) {
+      const imageBuffer = file.buffer;
 
-        const imageResult = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "blog/image" },
-            (error, result) => {
-              if (error) return reject(`Image upload failed: ${error.message}`);
-              resolve(result.secure_url);
+      const imageResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "blog/image" },
+          (error, result) => {
+            if (error) {
+              console.error("Cloudinary upload error:", error);
+              return reject(`Image upload failed: ${error.message}`);
             }
-          ).end(imageBuffer);
-        });
+            resolve(result.secure_url);
+          }
+        ).end(imageBuffer);
+      });
 
-        uploadedFiles.push(imageResult);
-      }
+      uploadedFiles.push(imageResult);
     }
 
-    console.log(uploadedFiles, "Uploaded images >>>>>.");
-
-    // Create blog with uploaded images
     const blog = new Blog({
-      ...req.body,
+     
+      title:title,
+      content:content,
+      category:category,
       author: req.user.userId,
       image: uploadedFiles, 
+      
     });
 
     await blog.save();
     res.status(201).json({ message: "Blog posted successfully", blog });
+
   } catch (error) {
+    console.error("Error creating blog:", error);
     res.status(400).json({ error: error.message });
   }
 };
+
 
 // Get all blogs with pagination and filtering
 export const getBlogs = async (req, res) => {
