@@ -13,7 +13,9 @@ const blogSchema = new mongoose.Schema({
   content: {
     type: String,
     required: [true, 'Content is required'],
-    minlength: [15, 'Content must be at least 10 characters'] 
+    minlength: [15, 'Content must be at least 10 characters'] ,
+    maxlength: [1500, 'Title cannot exceed 100 characters']
+
   },
 
   author: {
@@ -29,7 +31,7 @@ const blogSchema = new mongoose.Schema({
   },
 
   image: {
-    type: String 
+    type: [String]
   },
 
   createdAt: {

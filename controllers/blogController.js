@@ -1,19 +1,89 @@
 import Blog from '../model/blogSchema.js';
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Create new blog
+// export const createBlog = async (req, res) => {
+//   try {
+
+//     console.log(req.body,req.files,req.user.userId,"datas......>>>");
+
+//  const uploadedFiles = {};
+
+      
+//       if (req.files.image && req.files.image[0]) {
+//         const imageBuffer = req.files.image[0].buffer;
+//         const imageResult = await new Promise((resolve, reject) => {
+//           cloudinary.uploader
+//             .upload_stream(
+//               { folder: "blog/image" },
+//               (error, result) => {
+//                 if (error)
+//                   return reject(`image upload failed: ${error.message}`);
+//                 resolve(result);
+//               }
+//             )
+//             .end(imageBuffer);
+//         });
+//         uploadedFiles.image = imageResult.secure_url;
+//       }
+//     console.log(imageResult,"------------->>>>>>.");
+    
+//     // const blog = new Blog({
+//     //   ...req.body,
+//     //   author: req.user.userId
+      
+      
+//     // });
+
+
+
+//     // await blog.save();
+//     res.status(201).json({message:"blog posted successful",blog});
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 export const createBlog = async (req, res) => {
   try {
-    console.log(req.body,req.user.userId,"datas......>>>");
-    
+    console.log(req.body, req.files, req.user.userId, "datas......>>>>");
+
+    const uploadedFiles = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const imageBuffer = file.buffer;
+
+        const imageResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "blog/image" },
+            (error, result) => {
+              if (error) return reject(`Image upload failed: ${error.message}`);
+              resolve(result.secure_url);
+            }
+          ).end(imageBuffer);
+        });
+
+        uploadedFiles.push(imageResult);
+      }
+    }
+
+    console.log(uploadedFiles, "Uploaded images >>>>>.");
+
+    // Create blog with uploaded images
     const blog = new Blog({
       ...req.body,
-      author: req.user.userId 
+      author: req.user.userId,
+      image: uploadedFiles, 
     });
 
-    
-
     await blog.save();
-    res.status(201).json({message:"blog posted successful",blog});
+    res.status(201).json({ message: "Blog posted successfully", blog });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
