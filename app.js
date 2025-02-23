@@ -7,6 +7,7 @@ import logger from 'morgan';
 import { fileURLToPath } from 'url'; 
 import mongoDBConnect from './config/dbConnection.js';
 import { EventEmitter } from 'events';
+import AppError from './utils/AppError.js';
 import errorHandler from './middlewares/errorHandler.js';
 const __filename = fileURLToPath(import.meta.url); 
 const __dirname = path.dirname(__filename);  
@@ -32,13 +33,11 @@ app.use('/blog', blogRouter);
 
 mongoDBConnect();
 
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+
 
 // error handler
 app.use((err, req, res, next) => {
-  console.error("🔥 Error:", err);
+  console.error("❌ Error:", err);
 
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
@@ -54,6 +53,10 @@ app.use((err, req, res, next) => {
 // Handle Undefined Routes (404)
 app.all("*", (req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
+});
+
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
 app.use(errorHandler);
