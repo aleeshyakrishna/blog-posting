@@ -24,9 +24,9 @@ export const createBlog = async (req, res,next) => {
     // console.log(req.body, req.files, req.user.userId, "datas......>>>>");
     const{title,content,category} = req.body;
 
-    if (!req.files || req.files.length === 0) {
-      return next(new AppError("At least one image is required", 400));
-    }
+    // if (!req.files || req.files.length === 0) {
+    //   return next(new AppError("At least one image is required", 400));
+    // }
 
     const uploadedFiles = [];
 
@@ -61,7 +61,7 @@ export const createBlog = async (req, res,next) => {
     });
 
     await blog.save();
-    res.status(201).json({ message: "Blog posted successfully", blog });
+    res.status(201).json({ message: "Blog posted successfully ✅", blog });
 
   } catch (error) {
     console.error("Error creating blog:", error);
@@ -88,7 +88,7 @@ export const getAllBlogs = async (req, res) => {
 
     const total = await Blog.countDocuments(query);
 
-    res.json({
+    res.status(201).json({message:"Blogs fetched successfully ✅ ".
       blogs,
       totalPages: Math.ceil(total / limit),
       currentPage: page
@@ -122,7 +122,7 @@ export const getBlogs = async (req, res, next) => {
 
     const total = await Blog.countDocuments(query);
 
-    res.json({
+    res.json({message:"Blogs fetched successfully ✅",
       blogs,
       totalPages: Math.ceil(total / limit),
       currentPage: parseInt(page),
@@ -145,7 +145,7 @@ export const getBlogById = async (req, res, next) => {
      
     if (!blog) return next(new AppError("Blog not found", 404));
 
-    res.json({message:"blog fetched successfully",blog});
+    res.json({message:"blog fetched successfully ✅",blog});
 
   } catch (error) {
     next(error)
@@ -192,7 +192,7 @@ export const deleteBlog = async (req, res,next) => {
 
     }
 
-    res.json({ message: 'Blog deleted successfully' });
+    res.json({ message: 'Blog deleted successfully ✅' });
   } catch (error) {
     next(error)
   }

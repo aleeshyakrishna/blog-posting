@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/userSchema.js';
 import configKeys from '../config/configKeys.js';
+import AppError from '../utils/AppError.js';
+
 const auth = async (req, res, next) => {
   try {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');

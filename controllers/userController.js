@@ -100,7 +100,7 @@ const login = async (req, res,next) => {
     if (!emailRegex.test(email)) {
       return next(new AppError("Invalid email format", 400));
     }
-    
+
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -132,7 +132,7 @@ const login = async (req, res,next) => {
 };
 
 
-const logout = async (req, res) => {
+const logout = async (req, res, next) => {
 
   try {
     const refreshToken = req.header('Refresh-Token');
@@ -146,7 +146,7 @@ const logout = async (req, res) => {
     try {
       decoded = jwt.verify(refreshToken, configKeys.JWT_REFRESH_SECRET);
     } catch (error) {
-      return next(new AppError("Invalid or expired refresh token", 401));
+      return next(new AppError(" Invalid or expired refresh token", 401));
 
     }
 
@@ -165,8 +165,8 @@ const logout = async (req, res) => {
 
     }
 
-    console.log("Logged out successfully");
-    res.json({ message: 'Logged out successfully' });
+    console.log("Logged out successfully ✅");
+    res.json({ message: 'Logged out successfully ✅' });
 
   } catch (error) {
     next(error)
