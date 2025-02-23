@@ -88,7 +88,7 @@ export const getAllBlogs = async (req, res) => {
 
     const total = await Blog.countDocuments(query);
 
-    res.status(201).json({message:"Blogs fetched successfully ✅ ".
+    res.status(201).json({message:"Blogs fetched successfully ✅ ",
       blogs,
       totalPages: Math.ceil(total / limit),
       currentPage: page
