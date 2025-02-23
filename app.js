@@ -7,7 +7,7 @@ import logger from 'morgan';
 import { fileURLToPath } from 'url'; 
 import mongoDBConnect from './config/dbConnection.js';
 import { EventEmitter } from 'events';
-
+import errorHandler from './middlewares/errorHandler.js';
 const __filename = fileURLToPath(import.meta.url);  // Get current file URL and convert it to file path
 const __dirname = path.dirname(__filename);  // Get directory name from the file path
 EventEmitter.defaultMaxListeners = 15;
@@ -46,5 +46,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.use(errorHandler)
 
 export default app;

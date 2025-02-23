@@ -4,6 +4,7 @@ import auth from '../middlewares/auth.js';
 import blogController from '../controllers/blogController.js';
 import multer from 'multer';
 
+
 // Multer configuration for storing images in memory
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

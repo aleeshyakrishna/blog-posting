@@ -1,5 +1,8 @@
 import Blog from '../model/blogSchema.js';
 import { v2 as cloudinary } from "cloudinary";
+import { validationResult } from "express-validator";
+import AppError from "../utils/AppError.js";
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,15 +10,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
 // Create new blog
 
 export const createBlog = async (req, res) => {
   try {
+        const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next(new AppError(errors.array().map(e => e.msg).join(", "), 400));
+    }
+
     // console.log(req.body, req.files, req.user.userId, "datas......>>>>");
     const{title,content,category} = req.body;
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "At least one image is required" });
+      return next(new AppError("At least one image is required", 400));
     }
 
     const uploadedFiles = [];
@@ -97,9 +106,8 @@ export const getBlogById = async (req, res) => {
 
      console.log(blog);
      
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
+    if (!blog) return next(new AppError("Blog not found", 404));
+
     
     await blog.save();
 
@@ -124,9 +132,8 @@ export const updateBlog = async (req, res) => {
     );
     console.log(blog,"here im");
     
-    if (!blog) {
-      return res.status(404).json({ error: "Blog not found or unauthorized" });
-    }
+    if (!blog) return next(new AppError("Blog not found or unauthorized", 404));
+
 
     console.log("blog updated successfully!!");
     res.status(200).json({ message: "Blog updated successfully", blog });
