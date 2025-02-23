@@ -94,7 +94,7 @@ export const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
       .populate('author',  'username email')
-      
+
      console.log(blog);
      
     if (!blog) {
@@ -122,7 +122,8 @@ export const updateBlog = async (req, res) => {
       { $set: newData }, 
       { new: true } 
     );
-
+    console.log(blog,"here im");
+    
     if (!blog) {
       return res.status(404).json({ error: "Blog not found or unauthorized" });
     }
