@@ -9,8 +9,11 @@ const upload = multer({ storage: storage });
 // blog posting api
 router.post('/create-blog', auth, upload.array('image', 10), blogController.createBlog); 
 
-//get all posted blogs
+//get my blogs
 router.get('/my-blogs', auth ,blogController.getBlogs);
+
+//get all posted blogs
+router.get('/all-blogs', blogController.getAllBlogs);
 
 //view one particular blog by id
 router.get('/my-blog/:id', blogController.getBlogById);

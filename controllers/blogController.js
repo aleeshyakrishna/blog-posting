@@ -2,12 +2,12 @@ import Blog from '../model/blogSchema.js';
 import { v2 as cloudinary } from "cloudinary";
 import { validationResult } from "express-validator";
 import AppError from "../utils/AppError.js";
-
+import configKeys from '../config/configKeys.js';
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: configKeys.CLOUDINARY_CLOUD_NAME,
+  api_key: configKeys.CLOUDINARY_API_KEY,
+  api_secret: configKeys.CLOUDINARY_API_SECRET,
 });
 
 
@@ -72,7 +72,7 @@ export const createBlog = async (req, res,next) => {
 
 // Get all blogs with pagination and filtering
 
-export const getBlogs = async (req, res) => {
+export const getAllBlogs = async (req, res) => {
   try {
     const { page = 1, limit = 10, category } = req.query;
     const query = {};
@@ -99,6 +99,42 @@ export const getBlogs = async (req, res) => {
   }
 };
 
+
+// get my blogs
+export const getBlogs = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, category } = req.query;
+    
+    console.log(req.user,"------->>");
+    
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Construct query to fetch only the logged-in user's blogs
+    const query = { author: req.user.userId };
+    if (category) query.category = category;
+
+    const blogs = await Blog.find(query)
+      .populate('author', 'username email') // Optional: Remove this if not needed
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+    const total = await Blog.countDocuments(query);
+
+    res.json({
+      blogs,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // Get blog by ID
 export const getBlogById = async (req, res, next) => {
   try {
@@ -116,6 +152,7 @@ export const getBlogById = async (req, res, next) => {
     next(error)
   }
 };
+
 
 // Update blog
 
@@ -162,4 +199,4 @@ export const deleteBlog = async (req, res,next) => {
   }
 };
 
-export default { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog };
+export default { createBlog, getBlogs, getBlogById, getAllBlogs, updateBlog, deleteBlog };

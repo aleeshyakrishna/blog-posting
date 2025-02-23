@@ -3,17 +3,19 @@ import User from '../model/userSchema.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import AppError from "../utils/AppError.js";
+import configKeys from '../config/configKeys.js';
+console.log(configKeys.JWT_ACCESS_SECRET);
 
 const generateTokens = (userId) => {
   const accessToken = jwt.sign(
     { userId },
-    process.env.JWT_ACCESS_SECRET,
+    configKeys.JWT_ACCESS_SECRET,
     { expiresIn: '15m' }
   );
 
   const refreshToken = jwt.sign(
     { userId },
-    process.env.JWT_REFRESH_SECRET,
+    configKeys.JWT_REFRESH_SECRET,
     { expiresIn: '7d' }
   );
 

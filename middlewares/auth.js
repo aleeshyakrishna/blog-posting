@@ -31,7 +31,7 @@ const auth = async (req, res, next) => {
         // Generate new access token
         const newAccessToken = jwt.sign(
           { userId: user._id },
-          process.env.JWT_ACCESS_SECRET,
+          configKeys.JWT_ACCESS_SECRET,
           { expiresIn: '15m' }
         );
 
