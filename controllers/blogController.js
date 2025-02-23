@@ -93,7 +93,9 @@ export const getBlogs = async (req, res) => {
 export const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
-      .populate('author', 'username email')
+      .populate('author',  'username email')
+      
+     console.log(blog);
      
     if (!blog) {
       return res.status(404).json({ error: 'Blog not found' });
@@ -127,7 +129,7 @@ export const updateBlog = async (req, res) => {
 
     console.log("blog updated successfully!!");
     res.status(200).json({ message: "Blog updated successfully", blog });
-    
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
