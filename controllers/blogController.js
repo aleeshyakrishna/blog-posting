@@ -143,6 +143,7 @@ export const updateBlog = async (req, res,next) => {
 };
 
 // Delete blog
+
 export const deleteBlog = async (req, res,next) => {
   try {
     const blog = await Blog.findOneAndDelete({
@@ -160,4 +161,5 @@ export const deleteBlog = async (req, res,next) => {
     next(error)
   }
 };
+
 export default { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog };

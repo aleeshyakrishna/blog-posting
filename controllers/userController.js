@@ -39,7 +39,7 @@ const register = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
-// console.log(accessToken,refreshToken,"heyyyyyyy");
+// console.log(accessToken,refreshToken,"tokens");
 
     res.status(201).json({ message:"user registered successfully ✅ ",accessToken, refreshToken });
   } catch (error) {
@@ -68,7 +68,7 @@ const login = async (req, res,next) => {
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    // Save refresh token to user document
+    
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -88,7 +88,6 @@ const logout = async (req, res) => {
 
     }
 
-    // Verify the refresh token before using it
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
@@ -97,7 +96,7 @@ const logout = async (req, res) => {
 
     }
 
-    // Find user and remove refresh token
+    
     const user = await User.findOneAndUpdate(
       { _id: decoded.userId, refreshToken },
       { $set: { refreshToken: null } },
