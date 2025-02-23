@@ -1,41 +1,45 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/userSchema.js';
-
+import configKeys from '../config/configKeys.js';
 const auth = async (req, res, next) => {
   try {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');
     if (!accessToken) {
-      return res.status(401).json({ error: 'Access token required' });
+      return next(new AppError("Access token required", 401));
+
     }
 
     try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      const decoded = jwt.verify(accessToken, configKeys.JWT_ACCESS_SECRET);
       req.user = decoded; 
       return next();
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        console.log('🔄 Access token expired, trying refresh token...');
+        console.log(' Access token expired, trying refresh token...');
       } else {
-        return res.status(401).json({ error: 'Invalid access token' });
+        return next(new AppError("Invalid access token", 401));
+
       }
     }
 
     const refreshToken = req.header('Refresh-Token');
     if (!refreshToken) {
-      return res.status(401).json({ error: 'Refresh token required' });
+      return next(new AppError("Refresh token required", 401));
+
     }
 
     const user = await User.findOne({ refreshToken });
     if (!user) {
-      return res.status(403).json({ error: 'Invalid refresh token' });
+      return next(new AppError("Invalid refresh token", 403));
+
     }
 
     try {
-      jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      jwt.verify(refreshToken, configKeys.JWT_REFRESH_SECRET);
 
       const newAccessToken = jwt.sign(
         { userId: user._id },
-        process.env.JWT_ACCESS_SECRET,
+        configKeys.JWT_ACCESS_SECRET,
         { expiresIn: '20m' }
       );
 
@@ -43,10 +47,11 @@ const auth = async (req, res, next) => {
       req.user = { userId: user._id };
       next();
     } catch (error) {
-      return res.status(403).json({ error: 'Invalid or expired refresh token' });
+      return next(new AppError("Invalid or expired refresh token", 403));
+
     }
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    next(error)
   }
 };
 

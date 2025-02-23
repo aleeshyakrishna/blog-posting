@@ -21,11 +21,11 @@ const generateTokens = (userId) => {
 
 };
 
-const register = async (req, res) => {
+const register = async (req, res,next) => {
   try {
     const { username, email, password } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ email});
     if (existingUser) {
       
       return next(new AppError("User already exists", 400));
@@ -39,13 +39,14 @@ const register = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
-// console.log(accessToken,refreshToken,"tokens");
+
+   // console.log(accessToken,refreshToken,"tokens");
 
     res.status(201).json({ message:"user registered successfully ✅ ",accessToken, refreshToken });
+
   } catch (error) {
     console.log(error);
-    return next(new AppError("something went wrong", 404));
-    
+    next(error)    
   }
 };
 
@@ -72,7 +73,7 @@ const login = async (req, res,next) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.json({ accessToken, refreshToken });
+    res.json({ message:"Logged In successfully ✅ ",accessToken, refreshToken });
   } catch (error) {
     next(error)
   }
@@ -90,7 +91,7 @@ const logout = async (req, res) => {
 
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      decoded = jwt.verify(refreshToken, configKeys.JWT_REFRESH_SECRET);
     } catch (error) {
       return next(new AppError("Invalid or expired refresh token", 401));
 
@@ -112,7 +113,7 @@ const logout = async (req, res) => {
     res.json({ message: 'Logged out successfully' });
 
   } catch (error) {
-    return next(new AppError("something went wrong", 404));
+    next(error)
   }
 };
 
