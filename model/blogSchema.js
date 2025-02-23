@@ -23,41 +23,9 @@ const blogSchema = new mongoose.Schema({
     required: true,
     enum: ['Technology', 'Lifestyle', 'Travel', 'Food', 'Other']
   },
-  tags: [{
-    type: String,
-    trim: true
-  }],
   image: {
     type: String // URL to image
   },
-  status: {
-    type: String,
-    enum: ['draft', 'published'],
-    default: 'draft'
-  },
-  views: {
-    type: Number,
-    default: 0
-  },
-  likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  comments: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    content: {
-      type: String,
-      required: true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
   createdAt: {
     type: Date,
     default: Date.now
