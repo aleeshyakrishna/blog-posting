@@ -82,7 +82,8 @@ const register = async (req, res, next) => {
 
     user.refreshToken = refreshToken;
     await user.save();
-// console.log(accessToken,refreshToken,"tokens");
+
+// console.log(accessToken,refreshToken,"tokens..");
 
     res.status(201).json({ message:"user registered successfully ✅ ",accessToken, refreshToken });
   } catch (error) {
