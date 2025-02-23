@@ -15,8 +15,8 @@ router.get('/my-blogs', auth ,blogController.getBlogs);
 //get all posted blogs
 router.get('/all-blogs', blogController.getAllBlogs);
 
-//view one particular blog by id
-router.get('/my-blog/:id', blogController.getBlogById);
+//get a single blog by id
+router.get('/blog/:id', blogController.getBlogById);
 
 //update blog by id
 router.put('/update/:id', auth, blogController.updateBlog);

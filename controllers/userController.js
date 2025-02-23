@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import AppError from "../utils/AppError.js";
 import configKeys from '../config/configKeys.js';
-console.log(configKeys.JWT_ACCESS_SECRET);
 
 const generateTokens = (userId) => {
   const accessToken = jwt.sign(

@@ -1,4 +1,4 @@
-// After (ES Modules)
+
 import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
@@ -8,8 +8,8 @@ import { fileURLToPath } from 'url';
 import mongoDBConnect from './config/dbConnection.js';
 import { EventEmitter } from 'events';
 import errorHandler from './middlewares/errorHandler.js';
-const __filename = fileURLToPath(import.meta.url);  // Get current file URL and convert it to file path
-const __dirname = path.dirname(__filename);  // Get directory name from the file path
+const __filename = fileURLToPath(import.meta.url); 
+const __dirname = path.dirname(__filename);  
 EventEmitter.defaultMaxListeners = 15;
 
 
@@ -31,13 +31,12 @@ app.use('/', usersRouter);
 app.use('/blog', blogRouter);
 
 mongoDBConnect();
-// catch 404 and forward to error handler
+
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // error handler
-// Ensure errors are returned as JSON
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err);
 
@@ -57,7 +56,6 @@ app.all("*", (req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 
-// Global Error Handler (Must Be Last Middleware)
 app.use(errorHandler);
 
 export default app;

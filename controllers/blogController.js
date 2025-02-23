@@ -111,12 +111,11 @@ export const getBlogs = async (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Construct query to fetch only the logged-in user's blogs
     const query = { author: req.user.userId };
     if (category) query.category = category;
 
     const blogs = await Blog.find(query)
-      .populate('author', 'username email') // Optional: Remove this if not needed
+      .populate('author', 'username email') 
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
