@@ -1,7 +1,6 @@
 
 import User from '../model/userSchema.js';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 import AppError from "../utils/AppError.js";
 import configKeys from '../config/configKeys.js';
 
