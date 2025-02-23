@@ -8,47 +8,7 @@ cloudinary.config({
 });
 
 // Create new blog
-// export const createBlog = async (req, res) => {
-//   try {
 
-//     console.log(req.body,req.files,req.user.userId,"datas......>>>");
-
-//  const uploadedFiles = {};
-
-      
-//       if (req.files.image && req.files.image[0]) {
-//         const imageBuffer = req.files.image[0].buffer;
-//         const imageResult = await new Promise((resolve, reject) => {
-//           cloudinary.uploader
-//             .upload_stream(
-//               { folder: "blog/image" },
-//               (error, result) => {
-//                 if (error)
-//                   return reject(`image upload failed: ${error.message}`);
-//                 resolve(result);
-//               }
-//             )
-//             .end(imageBuffer);
-//         });
-//         uploadedFiles.image = imageResult.secure_url;
-//       }
-//     console.log(imageResult,"------------->>>>>>.");
-    
-//     // const blog = new Blog({
-//     //   ...req.body,
-//     //   author: req.user.userId
-      
-      
-//     // });
-
-
-
-//     // await blog.save();
-//     res.status(201).json({message:"blog posted successful",blog});
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// };
 export const createBlog = async (req, res) => {
   try {
     // console.log(req.body, req.files, req.user.userId, "datas......>>>>");
@@ -60,7 +20,8 @@ export const createBlog = async (req, res) => {
 
     const uploadedFiles = [];
 
-    for (const file of req.files) {
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
       const imageBuffer = file.buffer;
 
       const imageResult = await new Promise((resolve, reject) => {
@@ -86,7 +47,7 @@ export const createBlog = async (req, res) => {
       category:category,
       author: req.user.userId,
       image: uploadedFiles, 
-      
+
     });
 
     await blog.save();
@@ -100,14 +61,14 @@ export const createBlog = async (req, res) => {
 
 
 // Get all blogs with pagination and filtering
+
 export const getBlogs = async (req, res) => {
   try {
-    const { page = 1, limit = 10, category, tag, status } = req.query;
+    const { page = 1, limit = 10, category } = req.query;
     const query = {};
 
     if (category) query.category = category;
-    if (tag) query.tags = tag;
-    if (status) query.status = status;
+    
 
     const blogs = await Blog.find(query)
       .populate('author', 'username email')
@@ -122,6 +83,7 @@ export const getBlogs = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       currentPage: page
     });
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

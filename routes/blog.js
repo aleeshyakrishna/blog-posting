@@ -11,7 +11,6 @@ const upload = multer({ storage: storage });
 // Route for creating a blog with multiple image uploads
 router.post('/create-blog', auth, upload.array('image', 10), blogController.createBlog); 
 
-// Uncomment other routes if needed
 // router.get('/list-blog', getBlogs);
 // router.get('/display/:id', getBlogById);
 // router.put('/update/:id', auth, updateBlog);
