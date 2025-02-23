@@ -14,7 +14,7 @@ EventEmitter.defaultMaxListeners = 15;
 
 
 import usersRouter from './routes/users.js';
-
+import blogRouter from './routes/blog.js'
 var app = express();
 
 // view engine setup
@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', usersRouter);
-// app.use('/users', usersRouter);
+app.use('/blog', blogRouter);
 
 mongoDBConnect();
 // catch 404 and forward to error handler
