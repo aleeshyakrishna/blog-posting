@@ -75,25 +75,62 @@ const login = async (req, res) => {
   }
 };
 
+// const logout = async (req, res) => {
+//   try {
+//     const refreshToken = req.header('Refresh-Token');
+    
+//     // Find user and remove refresh token
+//     await User.findOneAndUpdate(
+//       { refreshToken },
+//       { $set: { refreshToken: null } }
+//     );
+//     console.log("logged out successfully");
+    
+//     res.json({ message: 'Logged out successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+
+// };
 const logout = async (req, res) => {
   try {
     const refreshToken = req.header('Refresh-Token');
-    
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token required' });
+    }
+
+    // Verify the refresh token before using it
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (error) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+
     // Find user and remove refresh token
-    await User.findOneAndUpdate(
-      { refreshToken },
-      { $set: { refreshToken: null } }
+    const user = await User.findOneAndUpdate(
+      { _id: decoded.userId, refreshToken },
+      { $set: { refreshToken: null } },
+      { new: true }
     );
 
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid refresh token' });
+    }
+
+    console.log("Logged out successfully");
     res.json({ message: 'Logged out successfully' });
+
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
-
 };
 
 const refreshAccessToken = async (req, res) => {
   try {
+    console.log("jjjjjjjjjjj");
+    
     const refreshToken = req.header('Refresh-Token');
     if (!refreshToken) {
       return res.status(401).json({ error: 'Refresh token required' });
@@ -126,4 +163,4 @@ const refreshAccessToken = async (req, res) => {
   }
 };
 
-export default { register, login, logout, refreshAccessToken };
+export default { register, login, logout };
